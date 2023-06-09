@@ -1,6 +1,7 @@
-﻿namespace Backend.Models.Requests.Work
+﻿namespace Backend.Models.Responses
 {
-    public class RemoveWorkResponse
+    public class RemoveWorkResponse : ResponseBase
     {
+        public int Id { get; set; }
     }
 }

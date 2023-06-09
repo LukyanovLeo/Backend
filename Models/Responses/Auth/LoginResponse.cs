@@ -1,13 +1,11 @@
-﻿namespace Backend.Models.Requests.Auth
+﻿namespace Backend.Models.Responses
 {
-    public class LoginResponse
+    public class LoginResponse : ResponseBase
     {
-        public bool IsLogedIn { get; set; }
+        public int UserId { get; set; }
 
+        public string UserLogin { get; set; }
 
-        public LoginResponse(bool isLogedIn)
-        {
-            IsLogedIn = isLogedIn;
-        }
+        public string UserName { get; set; }
     }
 }

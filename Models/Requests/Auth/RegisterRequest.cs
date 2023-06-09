@@ -1,4 +1,4 @@
-﻿namespace Backend.Models.Requests.Auth
+﻿namespace Backend.Models.Requests
 {
     public class RegisterRequest
     {

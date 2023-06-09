@@ -1,6 +1,9 @@
-﻿namespace Backend.Models.Requests.Work
+﻿using Backend.Models.Entities;
+
+namespace Backend.Models.Responses
 {
-    public class GetWorksAllResponse
+    public class GetWorksAllResponse : ResponseBase
     {
+        public Work[] Works { get; set; }
     }
 }

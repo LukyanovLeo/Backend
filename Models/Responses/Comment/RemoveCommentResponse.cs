@@ -1,6 +1,7 @@
-﻿namespace Backend.Models.Requests.Comment
+﻿namespace Backend.Models.Responses
 {
-    public class RemoveCommentResponse
+    public class RemoveCommentResponse : ResponseBase
     {
+        public int Id { get; set; }
     }
 }

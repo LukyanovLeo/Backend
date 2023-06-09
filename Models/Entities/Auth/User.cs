@@ -1,4 +1,4 @@
-﻿namespace Backend.Models.Entities.Auth
+﻿namespace Backend.Models.Entities
 {
     public class User
     {

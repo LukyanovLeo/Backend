@@ -1,6 +1,6 @@
 ﻿namespace Backend.Models.Requests
 {
-    public class GetWorksAllRequest
+    public class RequestBase
     {
     }
 }

@@ -1,6 +1,7 @@
-﻿namespace Backend.Models.Requests.Work
+﻿namespace Backend.Models.Responses
 {
-    public class EditWorkResponse
+    public class EditWorkResponse : ResponseBase
     {
+        public int Id { get; set; }
     }
 }

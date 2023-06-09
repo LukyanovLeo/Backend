@@ -1,6 +1,9 @@
-﻿namespace Backend.Models.Requests.Work
+﻿using Backend.Models.Entities;
+
+namespace Backend.Models.Responses
 {
-    public class GetWorksByFilterResponse
+    public class GetWorksByFilterResponse : ResponseBase
     {
+        public Work[] Works { get; set; }
     }
 }

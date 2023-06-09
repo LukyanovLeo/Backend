@@ -1,6 +1,6 @@
 ﻿using Backend.Models.Enums;
 
-namespace Backend.Models.Entities.Comment
+namespace Backend.Models.Entities
 {
     public class Comment
     {

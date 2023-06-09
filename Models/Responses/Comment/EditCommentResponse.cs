@@ -1,12 +1,7 @@
-﻿namespace Backend.Models.Requests.Comment
+﻿namespace Backend.Models.Responses
 {
-    public class EditCommentResponse
+    public class EditCommentResponse : ResponseBase
     {
-        public bool IsSuccess { get; set; }
-
-        public EditCommentResponse(bool isSuccess)
-        {
-            IsSuccess = isSuccess;
-        }
+        public int Id { get; set; }
     }
 }

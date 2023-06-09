@@ -1,4 +1,4 @@
-﻿namespace Backend.Models.Requests.Comment
+﻿namespace Backend.Models.Requests
 {
     public class EditCommentRequest
     {

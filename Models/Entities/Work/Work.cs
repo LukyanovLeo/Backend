@@ -1,4 +1,4 @@
-﻿namespace Backend.Models.Entities.Work
+﻿namespace Backend.Models.Entities
 {
     public class Work
     {

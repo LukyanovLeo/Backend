@@ -1,12 +1,11 @@
-﻿namespace Backend.Models.Requests.Auth
+﻿namespace Backend.Models.Responses
 {
-    public class RegisterResponse
+    public class RegisterResponse : ResponseBase
     {
-        public bool IsSuccess { get; set; }
+        public int UserId { get; set; }
 
-        public RegisterResponse(bool isSuccess)
-        {
-            IsSuccess = isSuccess;
-        }
+        public string UserLogin { get; set; }
+
+        public string UserName { get; set; }
     }
 }

@@ -15,7 +15,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
+app.UseRouting();
+app.UseCors();
 
-app.MapControllers();
+app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}");
 
 app.Run();
