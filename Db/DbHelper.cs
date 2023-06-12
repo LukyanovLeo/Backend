@@ -1,4 +1,5 @@
-﻿using Backend.Models.Requests;
+﻿using Backend.Models.Entities;
+using Backend.Models.Requests;
 using Backend.Models.Responses;
 using Backend.Models.Responses.Auth;
 using Dapper;
@@ -7,7 +8,7 @@ using System.Data;
 
 namespace Backend.Db
 {
-    public class DbHelper
+    public class DbHelper : IDbHelper
     {
         private readonly string _connectionString;
 
@@ -33,15 +34,28 @@ namespace Backend.Db
         {
             var dp = new DynamicParameters();
             dp.Add("@login", request.Login, DbType.String);
-            dp.Add("@name", request.Name, DbType.String);
-            dp.Add("@email", request.Email, DbType.String);
             dp.Add("@password", request.Password, DbType.String);
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
-                return await connection.QuerySingleOrDefaultAsync<RegisterResponse>(Queries.RegisterQuery, dp);
+                var response = await connection.QuerySingleOrDefaultAsync<RegisterResponse>(Queries.RegisterQuery, dp);
+                return await connection.QuerySingleOrDefaultAsync<RegisterResponse>(Queries.LoginQuery, dp);
             }
         }
+
+        //public async Task<UploadAvatarResponse> UploadAvatar(UploadAvatarRequest request)
+        //{
+        //    var dp = new DynamicParameters();
+        //    dp.Add("@login", request.Avatar, DbType.String);
+
+        //    using (var connection = new NpgsqlConnection(_connectionString))
+        //    {
+        //        var response = await connection.QuerySingleOrDefaultAsync<RegisterResponse>(Queries.RegisterQuery, dp);
+        //        return await connection.QuerySingleOrDefaultAsync<RegisterResponse>(Queries.LoginQuery, dp);
+        //    }
+        //}
+
+
 
         public async Task<AddCommentResponse> AddComment(AddCommentRequest request)
         {
@@ -82,24 +96,27 @@ namespace Backend.Db
 
 
 
-        public async Task<IEnumerable<GetCommentsAllResponse>> GetCommentsAll(GetCommentsAllRequest request)
+        public async Task<GetCommentsAllResponse> GetCommentsAll(GetCommentsAllRequest request)
         {
             var dp = new DynamicParameters();
             dp.Add("@id", request.WorkId, DbType.Int32);
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
-                return await connection.QueryAsync<GetCommentsAllResponse>(Queries.GetCommentsAllQuery, dp);
+                var response = await connection.QueryAsync<Comment>(Queries.GetCommentsAllQuery, dp);
+                return new GetCommentsAllResponse
+                {
+                    Comments = response.ToArray()
+                };
             }
         }
 
         public async Task<AddWorkResponse> AddWork(AddWorkRequest request)
         {
             var dp = new DynamicParameters();
-            dp.Add("@name", request.Name, DbType.String);
+            dp.Add("@name", request.Tag, DbType.String);
             dp.Add("@description", request.Description, DbType.String);
-            dp.Add("@userId", request.UserId, DbType.Int32);
-            dp.Add("@data", request.Data, DbType.String);
+            dp.Add("@data", request.Picture, DbType.Byte);
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
@@ -129,22 +146,30 @@ namespace Backend.Db
             }
         }
 
-        public async Task<IEnumerable<GetWorksAllResponse>> GetWorksAll(GetWorksAllRequest request)
+        public async Task<GetWorksAllResponse> GetWorksAll(GetWorksAllRequest request)
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
-                return await connection.QueryAsync<GetWorksAllResponse>(Queries.GetWorksAllQuery);
+                var response = await connection.QueryAsync<Work>(Queries.GetWorksAllQuery);
+                return new GetWorksAllResponse 
+                { 
+                    Works = response.ToArray() 
+                };
             }
         }
 
-        public async Task<IEnumerable<GetWorksByFilterResponse>> GetWorksByFilter(GetWorksByFilterRequest request)
+        public async Task<GetWorksByFilterResponse> GetWorksByFilter(GetWorksByFilterRequest request)
         {
             var dp = new DynamicParameters();
             dp.Add("@id", request.Name, DbType.Int32);
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
-                return await connection.QueryAsync<GetWorksByFilterResponse>(Queries.GetWorksByFilterQuery, dp);
+                var response = await connection.QueryAsync<Work>(Queries.GetWorksByFilterQuery, dp);
+                return new GetWorksByFilterResponse
+                {
+                    Works = response.ToArray()
+                };
             }
         }
 
@@ -163,7 +188,7 @@ namespace Backend.Db
         public CheckLoginResponse CheckLogin(string login)
         {
             var dp = new DynamicParameters();
-            dp.Add("@login", login, DbType.Int32);
+            dp.Add("@login", login, DbType.String);
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {

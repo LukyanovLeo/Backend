@@ -2,12 +2,10 @@
 {
     public class AddWorkRequest
     {
-        public string Name { get; set; }
+        public string Tag { get; set; }
 
         public string Description { get; set; }
 
-        public int UserId { get; set; }
-
-        public string Data { get; set; }
+        public byte[] Picture { get; set; }
     }
 }

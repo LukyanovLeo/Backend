@@ -9,32 +9,32 @@ using System.Text;
 namespace Backend.Controllers
 {
     [ApiController]
-    [Route("auth")]
-    public class AuthController : Controller
+    [Route("user")]
+    public class UserController : Controller
     {
         private readonly DbHelper _dbHelper;
 
 
-        public AuthController(DbHelper dbHelper)
+        public UserController(IDbHelper dbHelper)
         {
-            _dbHelper = dbHelper;
+            _dbHelper = (DbHelper)dbHelper;
         }
 
         [HttpPost]
         [Route("login")]
         public async Task<LoginResponse> Login(LoginRequest request)
         {
-            request.Password = ComputeSHA256(request.Password);
+            request.Password = ComputeSHA256(request.Password).ToLower();
 
             var response = await _dbHelper.Login(request);
-            if (response.UserLogin is null)
+            if (response.Login is null)
             {
                 return new LoginResponse
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     Message = "Неправильный логин и/или пароль",
                 };
-            }            
+            }
 
             return response;
         }
@@ -43,8 +43,9 @@ namespace Backend.Controllers
         [Route("register")]
         public async Task<RegisterResponse> Register(RegisterRequest request)
         {
-            request.Password = ComputeSHA256(request.Password);
-            request.RepeatPassword = ComputeSHA256(request.RepeatPassword);
+            request.Password = ComputeSHA256(request.Password).ToLower();
+            request.RepeatPassword = ComputeSHA256(request.RepeatPassword).ToLower();
+
             if (request.Password == request.RepeatPassword)
             {
                 if (_dbHelper.CheckLogin(request.Login).IsLoginExists)
@@ -68,6 +69,13 @@ namespace Backend.Controllers
                     Message = "Error",
                 };
             }
+        }
+
+        [HttpPost]
+        [Route("avatar")]
+        public async Task<UploadAvatarResponse> UploadAvatar(UploadAvatarRequest request)
+        {
+            return null;
         }
 
 

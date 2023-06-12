@@ -4,10 +4,12 @@
     {
         public const string LoginQuery = @"
 BEGIN;
-    SELECT id, login, name
-    FROM public.user
-    WHERE login = @login
-        AND password = @password;
+    SELECT u.id, u.login, AVG(w.score_avg) as avgScore
+    FROM public.user u
+    JOIN public.work w on w.user_id = u.id
+    WHERE u.login = @login
+	    AND u.password = @password
+    GROUP BY u.id, u.login;
 
     UPDATE public.user
     SET last_login_at = NOW();
@@ -15,26 +17,27 @@ COMMIT;";
 
         public const string RegisterQuery = @"
 INSERT INTO public.user (login, name, email, password, registered_at, last_login_at)
-VALUES (@login, @name, @email, @password, NOW(), NOW());";
+VALUES (@login, null, null, @password, NOW(), NOW())
+RETURNING id as userId;";
 
 
 
         public const string AddCommentQuery = @"
 INSERT INTO public.comment (text, score_id, user_id, published_at)
 VALUES (@text, @scoreId, @userId, NOW())
-RETURNING id;";
+RETURNING id as commentId;";
 
         public const string EditCommentQuery = @"
 UPDATE public.comment
 SET text = @text,
     score_id = @scoreId
 WHERE id = @id
-RETURNING id;";
+RETURNING id as commentId;";
 
         public const string RemoveCommentQuery = @"
 DELETE FROM public.comment
 WHERE id = @id
-RETURNING id;";
+RETURNING id as commentId;";
 
         public const string GetCommentsAllQuery = @"
 SELECT c.text, c.score_id, u.login, c.published_at, c.work_id
@@ -47,8 +50,8 @@ ORDER BY c.published_at DESC;";
 
         public const string AddWorkQuery = @"
 INSERT INTO public.work (name, description, user_id, data, published_at, edited_at)
-VALUES (@name, @description, @userId, @data, NOW(), NOW())
-RETURNING id;";
+VALUES (@name, @description, 1, @data, NOW(), NOW())
+RETURNING id as workId;";
 
         public const string EditWorkQuery = @"
 UPDATE public.work
@@ -57,12 +60,12 @@ SET name = @name
     data = @data
     edited_at = NOW()
 WHERE id = @id
-RETURNING id;";
+RETURNING id as workId;";
 
         public const string RemoveWorkQuery = @"
 DELETE FROM public.work
 WHERE id = @id
-RETURNING id;";
+RETURNING id as workId;";
 
 
         public const string GetWorkDetailsQuery = @"
@@ -84,7 +87,9 @@ WHERE w.name LIKE '%'||@nameFilter||'%'
 	AND p.address LIKE '%'||@address||'%';";
 
         public const string CheckLoginQuery = @"
-SELECT COUNT(1)
+SELECT CASE WHEN count(1) >= 1 THEN true
+            ELSE false
+       END as isLoginExists
 FROM public.user
 WHERE login = @login";
     };
