@@ -41,7 +41,7 @@ namespace Backend.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<RegisterResponse> Register(RegisterRequest request)
+        public async Task<LoginResponse> Register(RegisterRequest request)
         {
             request.Password = ComputeSHA256(request.Password).ToLower();
             request.RepeatPassword = ComputeSHA256(request.RepeatPassword).ToLower();
@@ -50,7 +50,7 @@ namespace Backend.Controllers
             {
                 if (_dbHelper.CheckLogin(request.Login).IsLoginExists)
                 {
-                    return new RegisterResponse
+                    return new LoginResponse
                     {
                         StatusCode = HttpStatusCode.BadRequest,
                         Message = "Такой логин уже занят.",
@@ -63,7 +63,7 @@ namespace Backend.Controllers
             }
             else
             {
-                return new RegisterResponse
+                return new LoginResponse
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     Message = "Error",

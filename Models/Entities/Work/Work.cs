@@ -10,10 +10,6 @@
 
         public int UserId { get; set; }
 
-        public string Data { get; set; }
-
-        public DateTime PublishedAt { get; set; }
-
-        public DateTime EditedAt { get; set; }
+        public byte[] Data { get; set; }
     }
 }

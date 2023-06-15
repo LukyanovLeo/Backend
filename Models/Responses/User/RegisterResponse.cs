@@ -2,6 +2,6 @@
 {
     public class RegisterResponse : ResponseBase
     {
-        public string Login { get; set; }
+        public string UserId { get; set; }
     }
 }

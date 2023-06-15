@@ -11,7 +11,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins("http://localhost:3000")
+        builder.WithOrigins("https://localhost:3000")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -26,15 +26,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseHttpsRedirection();
 app.UseAuthorization();
 app.UseRouting();
 app.UseCors(); 
-app.UseStaticFiles(new StaticFileOptions()
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"images")),
-    RequestPath = new PathString("/images")
-});
 
 app.MapControllerRoute(
         name: "default",

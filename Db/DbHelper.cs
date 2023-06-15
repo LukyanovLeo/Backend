@@ -4,7 +4,10 @@ using Backend.Models.Responses;
 using Backend.Models.Responses.Auth;
 using Dapper;
 using Npgsql;
+using NpgsqlTypes;
+using System;
 using System.Data;
+using System.Text;
 
 namespace Backend.Db
 {
@@ -30,7 +33,7 @@ namespace Backend.Db
             }
         }
 
-        public async Task<RegisterResponse> Register(RegisterRequest request)
+        public async Task<LoginResponse> Register(RegisterRequest request)
         {
             var dp = new DynamicParameters();
             dp.Add("@login", request.Login, DbType.String);
@@ -38,8 +41,8 @@ namespace Backend.Db
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
-                var response = await connection.QuerySingleOrDefaultAsync<RegisterResponse>(Queries.RegisterQuery, dp);
-                return await connection.QuerySingleOrDefaultAsync<RegisterResponse>(Queries.LoginQuery, dp);
+                var response = connection.QuerySingleOrDefault<RegisterResponse>(Queries.RegisterQuery, dp);
+                return connection.QuerySingleOrDefault<LoginResponse>(Queries.LoginQuery, dp);
             }
         }
 
@@ -61,8 +64,6 @@ namespace Backend.Db
         {
             var dp = new DynamicParameters();
             dp.Add("@text", request.Text, DbType.String);
-            dp.Add("@scoreId", request.ScoreId, DbType.Int32);
-            dp.Add("@userId", request.UserId, DbType.Int32);
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
@@ -113,10 +114,24 @@ namespace Backend.Db
 
         public async Task<AddWorkResponse> AddWork(AddWorkRequest request)
         {
+            var saveDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pictures");
+            if (!Directory.Exists(saveDir))
+            {
+                Directory.CreateDirectory(saveDir);
+            }
+
+            using (var ms = new MemoryStream())
+            {
+                request.Picture.CopyTo(ms);
+
+                var pictureBytes = ms.ToArray();
+                string fileName = Path.GetFileName(request.Picture.FileName);
+                string fileSavePath = Path.Combine(saveDir, fileName);
+                File.WriteAllBytes(fileSavePath, pictureBytes);
+            }
             var dp = new DynamicParameters();
             dp.Add("@name", request.Tag, DbType.String);
             dp.Add("@description", request.Description, DbType.String);
-            dp.Add("@data", request.Picture, DbType.Byte);
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
@@ -146,15 +161,15 @@ namespace Backend.Db
             }
         }
 
-        public async Task<GetWorksAllResponse> GetWorksAll(GetWorksAllRequest request)
+        public async Task<GetWorksAllResponse> GetWorksAll()
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
-                var response = await connection.QueryAsync<Work>(Queries.GetWorksAllQuery);
-                return new GetWorksAllResponse 
-                { 
-                    Works = response.ToArray() 
-                };
+                var works = await connection.QueryAsync<Work>(Queries.GetWorksAllQuery);
+                var resp = new GetWorksAllResponse();
+                resp.Works.AddRange(works);
+
+                return resp;
             }
         }
 

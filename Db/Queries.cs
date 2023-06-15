@@ -4,9 +4,13 @@
     {
         public const string LoginQuery = @"
 BEGIN;
-    SELECT u.id, u.login, AVG(w.score_avg) as avgScore
+    SELECT u.id, u.login, 
+        CASE
+            WHEN AVG(w.score_avg) IS NULL THEN 0
+            ELSE AVG(w.score_avg) 
+        END as avgScore
     FROM public.user u
-    JOIN public.work w on w.user_id = u.id
+    LEFT JOIN public.work w on w.user_id = u.id
     WHERE u.login = @login
 	    AND u.password = @password
     GROUP BY u.id, u.login;
@@ -24,7 +28,7 @@ RETURNING id as userId;";
 
         public const string AddCommentQuery = @"
 INSERT INTO public.comment (text, score_id, user_id, published_at)
-VALUES (@text, @scoreId, @userId, NOW())
+VALUES (@text, 5, 1, NOW())
 RETURNING id as commentId;";
 
         public const string EditCommentQuery = @"
@@ -49,8 +53,8 @@ ORDER BY c.published_at DESC;";
 
 
         public const string AddWorkQuery = @"
-INSERT INTO public.work (name, description, user_id, data, published_at, edited_at)
-VALUES (@name, @description, 1, @data, NOW(), NOW())
+INSERT INTO public.work (name, description, user_id, picture, published_at, edited_at)
+VALUES (@name, @description, 1, null, NOW(), NOW())
 RETURNING id as workId;";
 
         public const string EditWorkQuery = @"
@@ -74,9 +78,8 @@ FROM public.work w
 JOIN public.user u ON u.id = w.user_id;";
         
         public const string GetWorksAllQuery = @"
-SELECT w.name, u.user, w.preview
-FROM public.work w
-JOIN public.user u ON u.id = w.user_id;";
+SELECT w.name, w.preview
+FROM public.work w;";
         
         public const string GetWorksByFilterQuery = @"
 SELECT w.name, u.user, w.preview

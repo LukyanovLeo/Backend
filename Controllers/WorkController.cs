@@ -2,6 +2,11 @@ using Backend.Db;
 using Backend.Models.Requests;
 using Backend.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Net;
+using System.Text;
 
 namespace Backend.Controllers
 {
@@ -19,10 +24,57 @@ namespace Backend.Controllers
 
         [HttpGet]
         [Route("all")]
-        public async Task<GetWorksAllResponse> GetWorksAll(GetWorksAllRequest request)
+        public async Task<GetWorksAllResponse> GetWorksAll()
         {
-            var response = await _dbHelper.GetWorksAll(request);
+            var worksMetadata = await _dbHelper.GetWorksAll();
+
+            var response = new GetWorksAllResponse();
+            foreach (var filePath in Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pictures")))
+            {
+                var fileInfo = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pictures"));
+                var buffer = new byte[fileInfo.Length];
+
+                using (var ms = new MemoryStream())
+                {
+                    int read;
+                    while ((read = ms.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        ms.Write(buffer, 0, read);
+                    }
+
+                    response.WorksData.Add(ms.ToArray());
+                }
+
+                fileInfo.Delete();
+            }
+
             return response;
+
+            //var picturesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pictures");
+
+
+
+
+            //foreach (var file in Directory.GetFiles(picturesPath))
+            //{
+            //    using (var content = new FileStream(Path.Combine(picturesPath, file), FileMode.Open, FileAccess.Read, FileShare.Read))
+            //    {
+            //        var buffer = new byte[content.Length];
+            //        await content.ReadAsync(buffer, 0, buffer.Length);
+
+            //        yield return new GetWorksAllResponse
+            //        {
+
+            //        };
+            //    }
+            //}
+
+
+
+
+            //return response;
+
+
         }
 
         [HttpPost]
@@ -41,23 +93,23 @@ namespace Backend.Controllers
             return response;
         }
 
-        [HttpPost, DisableRequestSizeLimit]
-        [Route("add")]
-        public async Task<AddWorkResponse> AddWork(AddWorkRequest request)
-        {
-            var work = Request.Form.Files[0];
-            var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "UploadedFiles");
-
-            var response = await _dbHelper.AddWork(request);
-            return response;
-        }
-
         [HttpPost]
-        [Route("{workId:int}/edit")]
-        public async Task<EditWorkResponse> EditWork(EditWorkRequest request)
+        [Route("add")]
+        public async Task<AddWorkResponse> AddWork([FromForm] AddWorkRequest request)
         {
-            var response = await _dbHelper.EditWork(request);
-            return response;
+            if (request.Picture.Length > 0)
+            {
+                var response = await _dbHelper.AddWork(request);
+                return response;
+            }
+            else
+            {
+                return new AddWorkResponse
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    Message = "Error",
+                };
+            }
         }
 
         [HttpPost]
@@ -73,14 +125,6 @@ namespace Backend.Controllers
         public async Task<AddCommentResponse> AddComment(AddCommentRequest request)
         {
             var response = await _dbHelper.AddComment(request);
-            return response;
-        }
-
-        [HttpPost]
-        [Route("{workId:int}/comment/{commentId}/edit")]
-        public async Task<EditCommentResponse> EditComment(EditCommentRequest request)
-        {
-            var response = await _dbHelper.EditComment(request);
             return response;
         }
 
